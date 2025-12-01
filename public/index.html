@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vibe Terminal - Social Post Generator</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-gray-900 text-green-400 font-mono">
+  <div class="container mx-auto px-4 py-8 max-w-4xl">
+    <header class="mb-8">
+      <h1 class="text-3xl mb-2">VIBE TERMINAL v1.0</h1>
+      <p class="text-sm text-green-500">Social Media Post Generator</p>
+    </header>
+
+    <main id="app">
+      <!-- Auth Screen -->
+      <div id="auth-screen" class="space-y-4">
+        <div class="border border-green-400 p-6">
+          <h2 class="text-xl mb-4">LOGIN / SIGNUP</h2>
+          <form id="auth-form" class="space-y-4">
+            <div>
+              <label class="block mb-1">EMAIL:</label>
+              <input type="email" id="email" class="w-full bg-black border border-green-400 p-2 text-green-400" required>
+            </div>
+            <div>
+              <label class="block mb-1">PASSWORD:</label>
+              <input type="password" id="password" class="w-full bg-black border border-green-400 p-2 text-green-400" required>
+            </div>
+            <div class="flex gap-4">
+              <button type="submit" data-action="login" class="bg-green-400 text-black px-6 py-2 hover:bg-green-500">LOGIN</button>
+              <button type="submit" data-action="signup" class="border border-green-400 px-6 py-2 hover:bg-green-400 hover:text-black">SIGNUP</button>
+            </div>
+          </form>
+          <div id="auth-message" class="mt-4 text-yellow-400"></div>
+        </div>
+      </div>
+
+      <!-- Email Verification Screen -->
+      <div id="verify-screen" class="hidden space-y-4">
+        <div class="border border-green-400 p-6">
+          <h2 class="text-xl mb-4">EMAIL VERIFICATION</h2>
+          <div id="verify-message" class="mb-4"></div>
+          <button id="back-to-auth" class="border border-green-400 px-4 py-2 hover:bg-green-400 hover:text-black">BACK TO LOGIN</button>
+        </div>
+      </div>
+
+      <!-- Main App Screen (hidden initially) -->
+      <div id="main-screen" class="hidden space-y-4">
+        
+        <!-- Email Verification Banner -->
+        <div id="verification-banner" class="hidden border border-yellow-400 bg-yellow-900 bg-opacity-20 p-4">
+          <p class="text-yellow-400 mb-2">⚠ Please verify your email address to unlock all features.</p>
+          <button id="resend-verification-btn" class="border border-yellow-400 text-yellow-400 px-4 py-2 text-sm hover:bg-yellow-400 hover:text-black">RESEND VERIFICATION EMAIL</button>
+        </div>
+
+        <!-- Step 1: Platform Selection -->
+        <div id="step-platform" class="border border-green-400 p-6">
+          <h2 class="text-xl mb-4">STEP 1: SELECT PLATFORM</h2>
+          <div class="grid grid-cols-2 gap-4 mb-4">
+            <button class="platform-btn border border-green-400 p-4 hover:bg-green-400 hover:text-black" data-platform="twitter">X (TWITTER)</button>
+            <button class="platform-btn border border-green-400 p-4 hover:bg-green-400 hover:text-black" data-platform="linkedin">LINKEDIN</button>
+            <button class="platform-btn border border-green-400 p-4 hover:bg-green-400 hover:text-black" data-platform="facebook">FACEBOOK</button>
+            <button class="platform-btn border border-green-400 p-4 hover:bg-green-400 hover:text-black" data-platform="instagram">INSTAGRAM</button>
+          </div>
+          <button id="logout-btn" class="border border-green-400 px-4 py-2 text-sm hover:bg-green-400 hover:text-black">LOGOUT</button>
+        </div>
+
+        <!-- Step 2: Topic Selection -->
+        <div id="step-topic" class="hidden border border-green-400 p-6">
+          <h2 class="text-xl mb-4">STEP 2: CHOOSE TOPIC METHOD</h2>
+          <p class="mb-4 text-sm">Platform: <span id="selected-platform" class="text-yellow-400"></span></p>
+          <div class="space-y-4">
+            <button id="topic-manual-btn" class="w-full border border-green-400 p-4 text-left hover:bg-green-400 hover:text-black">
+              <div class="font-bold">WRITE YOUR OWN</div>
+              <div class="text-sm">Enter your own topic or idea</div>
+            </button>
+            <button id="topic-suggestions-btn" class="w-full border border-green-400 p-4 text-left hover:bg-green-400 hover:text-black">
+              <div class="font-bold">GET SUGGESTIONS</div>
+              <div class="text-sm">AI-powered trending topics</div>
+            </button>
+            <button id="topic-quotes-btn" class="w-full border border-green-400 p-4 text-left hover:bg-green-400 hover:text-black">
+              <div class="font-bold">FAMOUS QUOTES</div>
+              <div class="text-sm">Get inspired by wisdom</div>
+            </button>
+          </div>
+          <button id="back-to-platform" class="mt-4 border border-green-400 px-4 py-2 text-sm hover:bg-green-400 hover:text-black">BACK</button>
+        </div>
+
+        <!-- Step 3: Topic Input -->
+        <div id="step-input" class="hidden border border-green-400 p-6">
+          <h2 class="text-xl mb-4">STEP 3: <span id="input-title">ENTER TOPIC</span></h2>
+          <p class="mb-4 text-sm">Platform: <span id="selected-platform-2" class="text-yellow-400"></span></p>
+          
+          <div id="manual-input" class="hidden">
+            <label class="block mb-2">YOUR TOPIC:</label>
+            <textarea id="topic-text" class="w-full bg-black border border-green-400 p-2 text-green-400 h-24" placeholder="Enter your topic or idea..."></textarea>
+          </div>
+
+          <div id="suggestions-input" class="hidden">
+            <p class="mb-2">LOADING SUGGESTIONS...</p>
+            <div id="suggestions-list" class="space-y-2"></div>
+          </div>
+
+          <div id="quotes-input" class="hidden">
+            <p class="mb-2">LOADING QUOTES...</p>
+            <div id="quotes-list" class="space-y-2"></div>
+          </div>
+
+          <div class="flex gap-4 mt-4">
+            <button id="generate-btn" class="bg-green-400 text-black px-6 py-2 hover:bg-green-500">GENERATE POST</button>
+            <button id="back-to-topic" class="border border-green-400 px-4 py-2 hover:bg-green-400 hover:text-black">BACK</button>
+          </div>
+        </div>
+
+        <!-- Step 4: Generated Post -->
+        <div id="step-result" class="hidden border border-green-400 p-6">
+          <h2 class="text-xl mb-4">YOUR POST</h2>
+          <p class="mb-4 text-sm">Platform: <span id="selected-platform-3" class="text-yellow-400"></span></p>
+          
+          <div class="mb-4">
+            <label class="block mb-2">POST TEXT:</label>
+            <div id="generated-text" class="bg-black border border-green-400 p-4 whitespace-pre-wrap"></div>
+          </div>
+
+          <div class="mb-4">
+            <label class="block mb-2">ASCII ART:</label>
+            <div id="generated-image" class="bg-black border border-green-400 p-4 overflow-x-auto">
+              <pre class="text-xs"></pre>
+            </div>
+          </div>
+
+          <div class="flex gap-4">
+            <button id="copy-btn" class="bg-green-400 text-black px-6 py-2 hover:bg-green-500">COPY TEXT</button>
+            <button id="download-btn" class="border border-green-400 px-6 py-2 hover:bg-green-400 hover:text-black">DOWNLOAD IMAGE</button>
+            <button id="new-post-btn" class="border border-green-400 px-6 py-2 hover:bg-green-400 hover:text-black">NEW POST</button>
+          </div>
+          <div id="result-message" class="mt-4 text-yellow-400"></div>
+        </div>
+
+      </div>
+    </main>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>

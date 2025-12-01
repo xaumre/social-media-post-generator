@@ -1,0 +1,210 @@
+// Post generation logic
+const OpenAI = require('openai');
+
+const openai = new OpenAI({
+  apiKey: process.env.OPENAI_API_KEY
+});
+
+const platformConfig = {
+  twitter: {
+    name: 'X (Twitter)',
+    maxLength: 280,
+    tone: 'concise, witty, engaging',
+    hashtags: 3
+  },
+  linkedin: {
+    name: 'LinkedIn',
+    maxLength: 3000,
+    tone: 'professional, insightful, thought-leadership',
+    hashtags: 5
+  },
+  facebook: {
+    name: 'Facebook',
+    maxLength: 63206,
+    tone: 'conversational, friendly, relatable',
+    hashtags: 3
+  },
+  instagram: {
+    name: 'Instagram',
+    maxLength: 2200,
+    tone: 'visual, inspirational, lifestyle-focused',
+    hashtags: 10
+  }
+};
+
+// Trending topic suggestions (mock data for now)
+function getSuggestions(platform) {
+  const suggestions = {
+    twitter: [
+      'AI and the future of work',
+      'Productivity hacks for remote teams',
+      'The rise of sustainable tech',
+      'Mental health in the digital age',
+      'Web3 and decentralization'
+    ],
+    linkedin: [
+      'Leadership lessons from 2025',
+      'Building resilient teams',
+      'The future of professional development',
+      'Navigating career transitions',
+      'Innovation in enterprise software'
+    ],
+    facebook: [
+      'Weekend wellness tips',
+      'Family traditions that matter',
+      'Local community initiatives',
+      'Home cooking adventures',
+      'Travel memories and recommendations'
+    ],
+    instagram: [
+      'Morning routine inspiration',
+      'Minimalist lifestyle tips',
+      'Creative workspace setups',
+      'Fitness journey milestones',
+      'Sustainable fashion choices'
+    ]
+  };
+  
+  return suggestions[platform] || suggestions.twitter;
+}
+
+// Famous quotes
+function getQuotes() {
+  return [
+    { text: 'The only way to do great work is to love what you do.', author: 'Steve Jobs' },
+    { text: 'Innovation distinguishes between a leader and a follower.', author: 'Steve Jobs' },
+    { text: 'The future belongs to those who believe in the beauty of their dreams.', author: 'Eleanor Roosevelt' },
+    { text: 'Success is not final, failure is not fatal: it is the courage to continue that counts.', author: 'Winston Churchill' },
+    { text: 'Be yourself; everyone else is already taken.', author: 'Oscar Wilde' },
+    { text: 'The best time to plant a tree was 20 years ago. The second best time is now.', author: 'Chinese Proverb' },
+    { text: 'Your time is limited, don\'t waste it living someone else\'s life.', author: 'Steve Jobs' },
+    { text: 'The only impossible journey is the one you never begin.', author: 'Tony Robbins' }
+  ];
+}
+
+// Generate post using OpenAI
+async function generatePost(platform, topic) {
+  const config = platformConfig[platform];
+  
+  // Fallback to mock if no API key
+  if (!process.env.OPENAI_API_KEY) {
+    return generateMockPost(platform, topic, config);
+  }
+  
+  try {
+    const prompt = `Create an engaging social media post for ${config.name} about: "${topic}"
+
+Requirements:
+- Tone: ${config.tone}
+- Maximum length: ${config.maxLength} characters
+- Include ${config.hashtags} relevant hashtags at the end
+- Make it authentic, engaging, and platform-appropriate
+- Use emojis sparingly and naturally
+- Don't use quotation marks around the entire post
+
+Just return the post text, nothing else.`;
+
+    const completion = await openai.chat.completions.create({
+      model: 'gpt-4o-mini',
+      messages: [
+        {
+          role: 'system',
+          content: 'You are a social media expert who creates engaging, authentic posts optimized for different platforms.'
+        },
+        {
+          role: 'user',
+          content: prompt
+        }
+      ],
+      temperature: 0.8,
+      max_tokens: 500
+    });
+
+    let text = completion.choices[0].message.content.trim();
+    
+    // Ensure within character limit
+    if (text.length > config.maxLength) {
+      text = text.substring(0, config.maxLength - 3) + '...';
+    }
+    
+    return text;
+  } catch (error) {
+    console.error('OpenAI API error:', error.message);
+    return generateMockPost(platform, topic, config);
+  }
+}
+
+// Fallback mock post generation
+function generateMockPost(platform, topic, config) {
+  let text = `${topic}\n\n`;
+  
+  if (platform === 'twitter') {
+    text += `Quick thoughts on this topic. What's your take? 🚀`;
+  } else if (platform === 'linkedin') {
+    text += `I've been reflecting on this lately. In my experience, understanding ${topic.toLowerCase()} is crucial for professional growth.\n\nKey takeaways:\n• Stay curious\n• Keep learning\n• Share knowledge\n\nWhat's your perspective?`;
+  } else if (platform === 'facebook') {
+    text += `Just wanted to share some thoughts about this! It's been on my mind lately. Would love to hear what you all think! 💭`;
+  } else {
+    text += `Inspired by this idea today ✨\n\nDouble tap if you agree! 👇`;
+  }
+  
+  // Add hashtags
+  const hashtags = generateHashtags(topic, config.hashtags);
+  text += `\n\n${hashtags}`;
+  
+  // Ensure within character limit
+  if (text.length > config.maxLength) {
+    text = text.substring(0, config.maxLength - 3) + '...';
+  }
+  
+  return text;
+}
+
+// Generate hashtags
+function generateHashtags(topic, count) {
+  const words = topic.split(' ').filter(w => w.length > 3);
+  const tags = words.slice(0, count).map(w => 
+    '#' + w.replace(/[^a-zA-Z0-9]/g, '')
+  );
+  
+  // Add some generic popular tags
+  const genericTags = ['#Viral', '#Trending', '#MustRead', '#Inspiration', '#Growth'];
+  while (tags.length < count && genericTags.length > 0) {
+    tags.push(genericTags.shift());
+  }
+  
+  return tags.join(' ');
+}
+
+// Generate ASCII art (simple for now)
+function generateAsciiArt(topic) {
+  const width = 40;
+  const border = '═'.repeat(width);
+  const words = topic.toUpperCase().match(/.{1,36}/g) || [topic.toUpperCase()];
+  
+  let art = `╔${border}╗\n`;
+  words.forEach(line => {
+    const padding = Math.floor((width - line.length) / 2);
+    art += `║${' '.repeat(padding)}${line}${' '.repeat(width - padding - line.length)}║\n`;
+  });
+  art += `╚${border}╝\n\n`;
+  
+  // Add some decorative ASCII
+  art += `
+    ⚡ VIBE TERMINAL ⚡
+    
+    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+    ▓ VIRAL POST  ▓
+    ▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓▓
+  `;
+  
+  return art;
+}
+
+module.exports = {
+  platformConfig,
+  getSuggestions,
+  getQuotes,
+  generatePost,
+  generateAsciiArt
+};
