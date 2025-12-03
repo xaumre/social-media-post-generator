@@ -85,6 +85,13 @@ async function handleEmailVerification(token) {
 function showAuthScreen() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   authScreen.classList.add('active');
+  
+  // Reset screen indicator to LOGIN
+  const screenIndicator = document.getElementById('screen-indicator');
+  if (screenIndicator) {
+    screenIndicator.textContent = 'LOGIN';
+  }
+  
   setTimeout(() => {
     document.getElementById('auth-selection')?.focus();
   }, 100);
@@ -98,6 +105,12 @@ function showVerifyScreen() {
 function showMainScreen() {
   document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
   mainScreen.classList.add('active');
+  
+  // Update screen indicator with user email
+  const screenIndicator = document.getElementById('screen-indicator');
+  if (screenIndicator && state.user && state.user.email) {
+    screenIndicator.textContent = state.user.email;
+  }
   
   // Show verification banner if email not verified
   if (state.user && !state.user.emailVerified) {
