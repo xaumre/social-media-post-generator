@@ -64,36 +64,11 @@ body {
 }
 
 .banner-box {
+  border: 3px double #00ff00;
+  padding: 20px;
   margin-bottom: 20px;
-}
-
-.banner-line {
-  display: flex;
-  align-items: center;
-  width: 100%;
-}
-
-.banner-fill {
-  flex: 1;
-  height: 1px;
-  position: relative;
-  overflow: hidden;
-}
-
-.banner-fill::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  border-top: 1px solid currentColor;
-  transform: scaleX(100);
-}
-
-.banner-text {
-  flex: 1;
   text-align: center;
-  white-space: nowrap;
+  line-height: 1.8;
 }
 
 .function-bar {
