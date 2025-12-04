@@ -1,4 +1,4 @@
-# Phosphor Vibe Terminal
+# Phosphor Vibe Post
 
 Social media post generator with vintage terminal UI.
 
